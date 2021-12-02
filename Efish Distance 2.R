@@ -44,15 +44,17 @@ riverdistance(startseg = 59, endseg = 59, startvert = 31, endvert = 18, rivers =
 EFISH_Distance<-function(water_shapefile_name, point_shapefile_start, point_shapefile_end, plot_title)
 {
   River_Name<-line2network(path= ".", layer = water_shapefile_name)
+  River_Name2<-splitsegments(rivers = River_Name)#connecting segments that may be unconnected
+  River_Name3<-addverts(rivers = River_Name2, mindist = 10)#adding vertices every 10 meters on river line
   windowsFonts(A=windowsFont("Times New Roman"))
-  plot(River_Name, xlab="UTM Zone 17 (m)", ylab="UTM Zone 17 (m)", segmentnum=F, cex.axis=1, cex.lab=1.5, family="A")
+  plot(River_Name3, xlab="UTM Zone 17 (m)", ylab="UTM Zone 17 (m)", segmentnum=F, cex.axis=1, cex.lab=1.5, family="A")
   windowsFonts(B=windowsFont("Times New Roman"))
   legend("topleft", legend = c("Start", "End"), pch = c(16, 15), col = (c("Black", "grey")),
          inset = 0.05, title = "Electrofishing Sample Points")
-  start_points<-pointshp2segvert(path = ".", layer = point_shapefile_start, rivers = River_Name)
-  end_points<-pointshp2segvert(path = ".", layer = point_shapefile_end, rivers = River_Name)
-  river_start<-riverpoints(start_points$seg, start_points$vert, rivers = River_Name, col="black", pch = 16)
-  river_end<-riverpoints(end_points$seg, end_points$vert, rivers = River_Name, col = "grey", pch = 15)
+  start_points<-pointshp2segvert(path = ".", layer = point_shapefile_start, rivers = River_Name3)
+  end_points<-pointshp2segvert(path = ".", layer = point_shapefile_end, rivers = River_Name3)
+  river_start<-riverpoints(start_points$seg, start_points$vert, rivers = River_Name3, col="black", pch = 16)
+  river_end<-riverpoints(end_points$seg, end_points$vert, rivers = River_Name3, col = "grey", pch = 15)
   windowsFonts(C=windowsFont("Times New Roman"))
   title(plot_title, cex.main=2, family="C")
   addnortharrow(pos = "topright", scale = 0.5)
@@ -60,19 +62,20 @@ EFISH_Distance<-function(water_shapefile_name, point_shapefile_start, point_shap
   for (i in 1:nrow(river_coords)) 
   {
     river_distance<-riverdistance(startseg = river_coords[i,1], endseg = river_coords[i,2], 
-          startvert = river_coords[i,3], endvert = river_coords[i,4], rivers = River_Name, stopiferror = F, 
-          algorithm = "Dijkstra")#Dijkstra accounts for channel braiding, it is default
+          startvert = river_coords[i,3], endvert = river_coords[i,4], rivers = River_Name3, stopiferror = F, 
+          algorithm = "Dijkstra")
     river_coords[i,5]<-river_distance
   }
   Electrofishing_Distances<-cbind(start_points, river_coords[,5])
-  write.csv(Electrofishing_Distances, "C:/your_working_directory/Documents/R/river_distance_dataset.csv", row.names = F)
+  write.csv(Electrofishing_Distances, "C:/R/river_distance_dataset.csv", row.names = F)
 }
-River_Distances<-EFISH_Distance(water_shapefile_name = "your_river_shapefile", point_shapefile_start = "River_Start", point_shapefile_end = "River_End", plot_title = "River Electrofishing Points")
+River_Distances<-EFISH_Distance(water_shapefile_name = "your_river_shapefile", point_shapefile_start = "River_Start", 
+          point_shapefile_end = "River_End", plot_title = "River Electrofishing Points")
 
 
-#####################################
-####Creating basic stats function####
-#####################################
+###################################################
+####Creating basic stats function for distances####
+###################################################
 Electrofishing_Basic_Stats<-function(river_dataset)
 {
   new_river_dataset<-read.csv(river_dataset)
@@ -83,7 +86,9 @@ Electrofishing_Basic_Stats<-function(river_dataset)
   print(difference_mean)
   print(difference_stdev)
   lm_efish_distances<-lm(new_river_dataset$River_Distance~new_river_dataset$Euclidean_Distance_m)
-  plot(new_river_dataset$River_Distance, new_river_dataset$Euclidean_Distance_m, main="Calculated River Distance vs Straight Line Distance between Electrofishing Points", xlab="River Distance (m)", ylab="Straight Line Distance (m)")
+  plot(new_river_dataset$River_Distance, new_river_dataset$Euclidean_Distance_m, 
+       main="Calculated River Distance vs Straight Line Distance between Electrofishing Points", xlab="River Distance (m)", 
+       ylab="Straight Line Distance (m)")
   abline(lm_efish_distances)
   Project_SLD<-ddply(new_river_dataset, .(Project_Re), summarize, mean=mean(Euclidean_Distance_m))
   Project_RD<-ddply(new_river_dataset, .(Project_Re), summarize, mean=mean(River_Distance))
@@ -93,7 +98,7 @@ Electrofishing_Basic_Stats<-function(river_dataset)
   print(Project_Difference)
   summary(lm_efish_distances)
 }
-Electrofishing_Basic_Stats(river_dataset= "your_river.csv")
+Electrofishing_Basic_Stats(river_dataset= "river_distance_dataset.csv")#this will be the dataset written to your storage location from function above
 
 
 ###################################
