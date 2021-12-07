@@ -8,7 +8,6 @@ library(rgdal)
 library(sf)
 library(dplyr)
 library(prettymapr)
-library(plyr)
 
 
 #######################################################################################################################
@@ -72,40 +71,6 @@ EFISH_Distance<-function(water_shapefile_name, point_shapefile_start, point_shap
 River_Distances<-EFISH_Distance(water_shapefile_name = "your_river_shapefile", point_shapefile_start = "River_Start", 
           point_shapefile_end = "River_End", plot_title = "River Electrofishing Points")
 
-
-###################################################
-####Creating basic stats function for distances####
-###################################################
-Electrofishing_Basic_Stats<-function(river_dataset)
-{
-  new_river_dataset<-read.csv(river_dataset)
-  new_river_dataset$River_Distance[is.na(new_river_dataset$River_Distance)]<-0
-  new_river_dataset$Difference<-new_river_dataset$River_Distance-new_river_dataset$Euclidean_Distance_m
-  difference_mean<-mean(new_river_dataset$Difference)
-  difference_stdev<-sd(new_river_dataset$Difference)
-  print(difference_mean)
-  print(difference_stdev)
-  lm_efish_distances<-lm(new_river_dataset$River_Distance~new_river_dataset$Euclidean_Distance_m)
-  plot(new_river_dataset$River_Distance, new_river_dataset$Euclidean_Distance_m, 
-       main="Calculated River Distance vs Straight Line Distance between Electrofishing Points", xlab="River Distance (m)", 
-       ylab="Straight Line Distance (m)")
-  abline(lm_efish_distances)
-  Project_SLD<-ddply(new_river_dataset, .(Project_Re), summarize, mean=mean(Euclidean_Distance_m))
-  Project_RD<-ddply(new_river_dataset, .(Project_Re), summarize, mean=mean(River_Distance))
-  Project_Difference<-ddply(new_river_dataset, .(Project_Re), summarize, mean=mean(Difference))  
-  print(Project_SLD)
-  print(Project_RD)
-  print(Project_Difference)
-  summary(lm_efish_distances)
-}
-Electrofishing_Basic_Stats(river_dataset= "river_distance_dataset.csv")#this will be the dataset written to your storage location from function above
-
-
-###################################
-####Histogram of snap distances####
-###################################
-sample_snaps<-read.csv("river_distance_dataset.csv")
-hist(sample_snaps$snapdist, main="Snapping Distance (m)")
 
 
 
