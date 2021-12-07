@@ -10,19 +10,21 @@ library(dplyr)
 library(prettymapr)
 
 
+#Steps 1:4 include code to calculate river distance for one line of data in a dataset
+#Step 1
 #######################################################################################################################
 ####Importing river line shapefile, outlines do not work with riverdist, it must be a single polyline for the river####
 #######################################################################################################################
 River<-line2network(layer = "your_river_shapefile", tolerance = 1)
 
-
+#Step 2
 ################################################################################################
 ####Converting xy data to river point locations. Use pointshp2segvert for xy point shapefile####
 ################################################################################################
 River_Start<-pointshp2segvert(path = ".", layer = "your_river_Start", rivers=River)#path= your working directory, layer= shapefile
 River_End<-pointshp2segvert(path = ".", layer = "your_river_End", rivers=River)
 
-
+#Step 3
 #########################################
 ####Placing river points onto a map####
 #########################################
@@ -30,13 +32,14 @@ riverpoints(River_Start$seg, River_Start$vert, rivers = River, col = "green")
 riverpoints(River_End$seg, River_End$vert, rivers = River, col = "red")
 title("Sandusky River Electrofishing Start and End Points")
 
-
+#Step 4
 ##########################################################################################################
 ####Determining river distance between two points. Sample code to ensure distances can be determined######
 ##########################################################################################################
 riverdistance(startseg = 59, endseg = 59, startvert = 31, endvert = 18, rivers = River)
 
 
+#Combining steps 1-4
 #################################################################################
 ####Creating a function to determine river distance for entire river dataset#####
 #################################################################################
@@ -62,7 +65,7 @@ EFISH_Distance<-function(water_shapefile_name, point_shapefile_start, point_shap
   {
     river_distance<-riverdistance(startseg = river_coords[i,1], endseg = river_coords[i,2], 
           startvert = river_coords[i,3], endvert = river_coords[i,4], rivers = River_Name3, stopiferror = F, 
-          algorithm = "Dijkstra")
+          algorithm = "Dijkstra")#Djikstra allows for channel braiding
     river_coords[i,5]<-river_distance
   }
   Electrofishing_Distances<-cbind(start_points, river_coords[,5])
