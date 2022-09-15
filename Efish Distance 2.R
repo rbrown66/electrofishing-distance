@@ -40,9 +40,9 @@ riverdistance(startseg = 59, endseg = 59, startvert = 31, endvert = 18, rivers =
 
 
 #Combining steps 1-4
-#################################################################################
-####Creating a function to determine river distance for entire river dataset#####
-#################################################################################
+###################################################################################################################
+####Creating a function to determine river distance for entire river dataset and appending distance to dataset#####
+###################################################################################################################
 EFISH_Distance<-function(water_shapefile_name, point_shapefile_start, point_shapefile_end, plot_title)
 {
   River_Name<-line2network(path= ".", layer = water_shapefile_name)
