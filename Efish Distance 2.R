@@ -10,7 +10,8 @@ library(dplyr)
 library(prettymapr)
 
 
-#Steps 1:4 include code to calculate river distance for one line of data in a dataset
+#Steps 1:4 include code to calculate river distance for one line of data in a dataset. Calculating river distance for an entire dataset is below Step 4.  
+
 #Step 1
 #######################################################################################################################
 ####Importing river line shapefile, outlines do not work with riverdist, it must be a single polyline for the river####
