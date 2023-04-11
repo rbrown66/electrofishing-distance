@@ -1,7 +1,3 @@
-rm(list = ls())
-setwd("your working directory")
-
-
 library(riverdist)
 library(sp)
 library(rgdal)
